@@ -20,8 +20,11 @@ jobs:
       - name: Install Android SDK components
         run: |
           echo "ANDROID_HOME=$ANDROID_HOME"
-          sdkmanager --version
-          sdkmanager --install "platforms;android-35" "build-tools;35.0.0"
+          SDKMGR="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | head -n 1)"
+          if [ -z "$SDKMGR" ]; then echo "sdkmanager not found under ANDROID_HOME"; exit 1; fi
+          "$SDKMGR" --version
+          yes | "$SDKMGR" --licenses || true
+          "$SDKMGR" --install "platforms;android-35" "build-tools;35.0.0"
       - name: Build debug APK
         run: gradle --no-daemon --stacktrace assembleDebug
       - uses: actions/upload-artifact@v4
